@@ -1,271 +1,354 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Settings = ({
-  user = { name: "", email: "", avatar: "" },
-  csrfToken = "",
-  errorMessage = "",
-  successMessage = "",
-}) => {
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const Settings = () => {
+  const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    if (!token || !userData) {
+      navigate("/login");
+      return;
+    }
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
+    setFormData({ name: parsedUser.name, email: parsedUser.email });
+  }, [navigate]);
 
-  const scorePassword = (pass) => {
-    if (!pass) return 0;
-    let score = 0;
-    score += Math.min(10, pass.length) * 6;
-    if (/[a-z]/.test(pass)) score += 10;
-    if (/[A-Z]/.test(pass)) score += 10;
-    if (/[0-9]/.test(pass)) score += 10;
-    if (/[^A-Za-z0-9]/.test(pass)) score += 10;
-    return Math.min(100, score);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const getPasswordStrength = (score) => {
-    if (score > 80) return { label: "Rất mạnh", color: "green" };
-    if (score > 60) return { label: "Mạnh", color: "blue" };
-    if (score > 40) return { label: "Trung bình", color: "orange" };
-    return { label: "Yếu", color: "red" };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const updatedUser = { ...user, name: formData.name, email: formData.email };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    window.dispatchEvent(new Event("storage"));
+    setMessage("Cập nhật thành công!");
+    setTimeout(() => setMessage(""), 3000);
   };
 
-  const passwordScore = scorePassword(newPassword);
-  const passwordStrength = getPasswordStrength(passwordScore);
-  const passwordsMatch = confirmPassword && newPassword === confirmPassword;
+  const handlePasswordDataChange = (e) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+  };
+
+  const handlePasswordChange = (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("Mật khẩu xác nhận không khớp!");
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      alert("Mật khẩu mới phải có ít nhất 6 ký tự!");
+      return;
+    }
+    // TODO: Call API to change password
+    alert("Đổi mật khẩu thành công! (Tính năng đang phát triển)");
+    setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+  };
+
+  if (!user)
+    return (
+      <div>
+        <p>Đang tải...</p>
+      </div>
+    );
 
   return (
-    <div className="container settings-page">
-      <div className="settings-grid">
-        <aside className="settings-aside">
-          <h2>Xem trước hồ sơ</h2>
-          <div className="preview-card">
-            {user.avatar ? (
-              <img src={user.avatar} className="avatar-img" alt="avatar" />
-            ) : (
-              <div className="avatar-fallback small">
-                <i className="fas fa-user"></i>
-              </div>
-            )}
-            <h3>{user.name}</h3>
-            <p className="muted">{user.email}</p>
-            <a href="/profile" className="btn">
-              Xem hồ sơ
-            </a>
-          </div>
-        </aside>
-
-        <section className="settings-main">
-          <h1>Cài đặt tài khoản</h1>
-
-          {errorMessage && (
-            <div className="alert alert-danger">{errorMessage}</div>
-          )}
-          {successMessage && (
-            <div className="alert alert-success">{successMessage}</div>
-          )}
-
-          <form
-            action="/settings"
-            method="post"
-            encType="multipart/form-data"
-            className="settings-form"
+    <div
+      style={{
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        minHeight: "100vh",
+        padding: "3rem 0",
+      }}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "0 1rem" }}>
+        {/* Header */}
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "3rem",
+            background: "rgba(255,255,255,0.1)",
+            backdropFilter: "blur(10px)",
+            padding: "2rem",
+            borderRadius: "15px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h1
+            style={{
+              color: "white",
+              fontSize: "2.5rem",
+              margin: "0 0 0.5rem 0",
+              fontWeight: "700",
+              textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1rem",
+            }}
           >
-            <input type="hidden" name="_csrf" value={csrfToken} />
+            <i className="fas fa-cog" style={{ animation: "none" }}></i>
+            Cài đặt tài khoản
+          </h1>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.9)",
+              fontSize: "1.1rem",
+              margin: 0,
+            }}
+          >
+            Quản lý thông tin cá nhân và bảo mật tài khoản
+          </p>
+        </div>
 
-            <div className="form-row">
-              <label htmlFor="name">Tên</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                defaultValue={user.name}
-                required
-              />
-            </div>
+        {/* Success Message */}
+        {message && (
+          <div
+            style={{
+              background: "white",
+              color: "#27ae60",
+              padding: "1.25rem 1.5rem",
+              borderRadius: "12px",
+              marginBottom: "2rem",
+              textAlign: "center",
+              fontWeight: "600",
+              border: "2px solid #27ae60",
+              boxShadow: "0 4px 15px rgba(39, 174, 96, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.75rem",
+            }}
+          >
+            <i
+              className="fas fa-check-circle"
+              style={{ fontSize: "1.5rem" }}
+            ></i>
+            {message}
+          </div>
+        )}
 
-            <div className="form-row">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                defaultValue={user.email}
-                required
-              />
-            </div>
-
-            <div className="form-row">
-              <label htmlFor="avatar">
-                Avatar (jpg, png, gif) — tối đa 2MB
+        <div
+          style={{
+            background: "white",
+            borderRadius: "12px",
+            padding: "2rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            marginBottom: "2rem",
+          }}
+        >
+          <h2
+            style={{
+              color: "#2d3748",
+              marginBottom: "1.5rem",
+              borderBottom: "2px solid #e2e8f0",
+              paddingBottom: "0.5rem",
+            }}
+          >
+            Thông tin cá nhân
+          </h2>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "1.5rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#4a5568",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Họ và tên:
               </label>
-              <input id="avatar" name="avatar" type="file" accept="image/*" />
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                }}
+              />
             </div>
 
-            <div className="form-actions">
-              <button type="submit" className="btn">
-                Lưu thay đổi
+            <div style={{ marginBottom: "1.5rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#4a5568",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Email:
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button
+                type="submit"
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  borderRadius: "8px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  border: "none",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                }}
+              >
+                💾 Lưu thay đổi
               </button>
-              <a href="/profile" className="btn btn-secondary">
-                Hủy
+              <a
+                href="/profile"
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  borderRadius: "8px",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                  background: "#e2e8f0",
+                  color: "#4a5568",
+                  display: "inline-block",
+                }}
+              >
+                ❌ Hủy
               </a>
             </div>
           </form>
+        </div>
 
-          <hr />
-
-          <div className="card password-card" aria-labelledby="pw-heading">
-            <h2 id="pw-heading">Đổi mật khẩu</h2>
-
-            <form
-              action="/settings/password"
-              method="post"
-              className="settings-form"
-              aria-describedby="pw-help"
+        <div
+          style={{
+            background: "white",
+            borderRadius: "12px",
+            padding: "2rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h2
+            style={{
+              color: "#2d3748",
+              marginBottom: "1.5rem",
+              borderBottom: "2px solid #e2e8f0",
+              paddingBottom: "0.5rem",
+            }}
+          >
+            Đổi mật khẩu
+          </h2>
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label
+              style={{
+                display: "block",
+                fontWeight: "600",
+                color: "#4a5568",
+                marginBottom: "0.5rem",
+              }}
             >
-              <input type="hidden" name="_csrf" value={csrfToken} />
-              <div id="pw-help" className="sr-only">
-                Mật khẩu mới phải có ít nhất 8 ký tự.
-              </div>
-
-              <div className="pw-grid">
-                <div className="pw-item">
-                  <label htmlFor="current_password">Mật khẩu hiện tại</label>
-                  <div className="pw-wrap">
-                    <input
-                      id="current_password"
-                      name="current_password"
-                      type={showCurrentPassword ? "text" : "password"}
-                      required
-                      aria-required="true"
-                    />
-                    <button
-                      type="button"
-                      className="pw-toggle"
-                      aria-label={
-                        showCurrentPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-                      }
-                      onClick={() =>
-                        setShowCurrentPassword(!showCurrentPassword)
-                      }
-                    >
-                      <i
-                        className={`fas ${
-                          showCurrentPassword ? "fa-eye-slash" : "fa-eye"
-                        }`}
-                      ></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="pw-item">
-                  <label htmlFor="new_password">Mật khẩu mới</label>
-                  <div className="pw-wrap">
-                    <input
-                      id="new_password"
-                      name="new_password"
-                      type={showNewPassword ? "text" : "password"}
-                      minLength="8"
-                      required
-                      aria-required="true"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="pw-toggle"
-                      aria-label={
-                        showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-                      }
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                    >
-                      <i
-                        className={`fas ${
-                          showNewPassword ? "fa-eye-slash" : "fa-eye"
-                        }`}
-                      ></i>
-                    </button>
-                    {newPassword && (
-                      <div
-                        className="pw-meter"
-                        id="pw-meter"
-                        aria-hidden="true"
-                      >
-                        <div
-                          className="pw-meter-bar"
-                          style={{
-                            width: `${passwordScore}%`,
-                            backgroundColor: passwordStrength.color,
-                          }}
-                        ></div>
-                        <div className="pw-meter-text">
-                          {passwordStrength.label}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pw-item">
-                  <label htmlFor="new_password_confirm">
-                    Xác nhận mật khẩu mới
-                  </label>
-                  <div className="pw-wrap">
-                    <input
-                      id="new_password_confirm"
-                      name="new_password_confirm"
-                      type={showConfirmPassword ? "text" : "password"}
-                      minLength="8"
-                      required
-                      aria-required="true"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="pw-toggle"
-                      aria-label={
-                        showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-                      }
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      <i
-                        className={`fas ${
-                          showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                        }`}
-                      ></i>
-                    </button>
-                    {confirmPassword && (
-                      <div
-                        className="pw-match"
-                        id="pw-match"
-                        aria-live="polite"
-                        style={{
-                          color: passwordsMatch ? "green" : "red",
-                          marginTop: "8px",
-                        }}
-                      >
-                        {passwordsMatch ? "Khớp" : "Không khớp"}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="form-actions"
-                style={{ justifyContent: "flex-end" }}
-              >
-                <button type="submit" className="btn btn-danger">
-                  Đổi mật khẩu
-                </button>
-              </div>
-            </form>
+              Mật khẩu hiện tại:
+            </label>
+            <input
+              type="password"
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "2px solid #e2e8f0",
+                borderRadius: "8px",
+                fontSize: "1rem",
+              }}
+            />
           </div>
-        </section>
+
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label
+              style={{
+                display: "block",
+                fontWeight: "600",
+                color: "#4a5568",
+                marginBottom: "0.5rem",
+              }}
+            >
+              Mật khẩu mới:
+            </label>
+            <input
+              type="password"
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "2px solid #e2e8f0",
+                borderRadius: "8px",
+                fontSize: "1rem",
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label
+              style={{
+                display: "block",
+                fontWeight: "600",
+                color: "#4a5568",
+                marginBottom: "0.5rem",
+              }}
+            >
+              Xác nhận mật khẩu:
+            </label>
+            <input
+              type="password"
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "2px solid #e2e8f0",
+                borderRadius: "8px",
+                fontSize: "1rem",
+              }}
+            />
+          </div>
+
+          <button
+            type="button"
+            style={{
+              padding: "0.75rem 1.5rem",
+              borderRadius: "8px",
+              fontWeight: "600",
+              cursor: "pointer",
+              border: "none",
+              background: "#e74c3c",
+              color: "white",
+            }}
+          >
+            🔒 Đổi mật khẩu
+          </button>
+        </div>
       </div>
     </div>
   );

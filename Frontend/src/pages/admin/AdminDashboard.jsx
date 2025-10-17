@@ -11,6 +11,15 @@ const AdminDashboard = ({
       <h1 className="admin-title">Bảng điều khiển</h1>
       <div className="admin-grid">
         <div className="admin-card">
+          <div className="admin-card-header">Bảng điều khiển</div>
+          <div className="admin-card-body">
+            <div className="admin-metric">Trở về trang tổng quan quản trị</div>
+            <a className="btn btn-primary" href="/admin">
+              Về Dashboard
+            </a>
+          </div>
+        </div>
+        <div className="admin-card">
           <div className="admin-card-header">Người dùng</div>
           <div className="admin-card-body">
             <div className="admin-metric">

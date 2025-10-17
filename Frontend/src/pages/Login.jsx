@@ -34,9 +34,14 @@ const Login = () => {
       // 🔔 Báo cho Layout biết user vừa đăng nhập để cập nhật menu ngay
       window.dispatchEvent(new Event("userLogin"));
 
-      // ✅ Điều hướng sang trang home sau 1 giây
+      // ✅ Điều hướng: chỉ admin@gmail.com với role admin → /admin, others → /home
       setTimeout(() => {
-        navigate("/home");
+        const user = res.data.user;
+        if (user?.role === "admin" && user?.email === "admin@gmail.com") {
+          navigate("/admin");
+        } else {
+          navigate("/home");
+        }
       }, 1000);
     } catch (err) {
       console.error("Login error:", err.response?.data);

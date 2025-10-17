@@ -83,9 +83,7 @@ const Layout = ({ children }) => {
                   <a href="/profile">Hồ sơ</a>
                   <a href="/my-courses">Khóa học của tôi</a>
                   <a href="/settings">Cài đặt</a>
-                  {user.role === "admin" && (
-                    <a href="/admin/dashboard">Quản trị</a>
-                  )}
+                  {user.role === "admin" && <a href="/admin">Quản trị</a>}
                   <a
                     href="#"
                     onClick={(e) => {

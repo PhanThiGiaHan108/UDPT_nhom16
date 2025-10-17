@@ -7,7 +7,11 @@ import Contact from "./pages/Contact";
 import Courses from "./pages/Courses";
 import Features from "./pages/Features";
 import Login from "./pages/Login";
+import { AdminDashboard } from "./pages";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import MyCourses from "./pages/MyCourses";
+import Settings from "./pages/Settings";
 import CourseDetail from "./pages/CourseDetail";
 import PaymentPage from "./pages/PaymentPage";
 import "./App.css";
@@ -71,7 +75,11 @@ export default function App() {
           />
           <Route path="/features" element={<Features />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/course/:id" element={<CourseDetail />} />
           <Route path="/payment/:id" element={<PaymentPage />} />
         </Routes>

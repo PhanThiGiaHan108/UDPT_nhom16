@@ -40,6 +40,7 @@ export const register = async (req, res) => {
       name: fullName,
       email,
       password: hashedPassword,
+      role: "user", // default role for registrations
     });
 
     // 6️⃣ Trả về phản hồi thành công
@@ -49,6 +50,7 @@ export const register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -81,7 +83,7 @@ export const login = async (req, res) => {
 
     // 4️⃣ Tạo JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET || "secret",
       { expiresIn: "1d" }
     );
@@ -94,6 +96,7 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
