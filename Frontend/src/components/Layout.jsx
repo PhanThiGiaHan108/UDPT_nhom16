@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Outlet } from "react-router-dom"; // ✅ THÊM DÒNG NÀY
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -16,17 +17,12 @@ const Layout = ({ children }) => {
   };
 
   useEffect(() => {
-    // Khi Layout mount lần đầu → load user
     loadUser();
-
-    // 🔹 Khi tab khác hoặc component khác cập nhật localStorage → tự cập nhật user
     const handleStorageChange = () => loadUser();
     window.addEventListener("storage", handleStorageChange);
-
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // 🔹 Khi user đăng nhập thành công ở Login.jsx → thông báo cho Layout
   useEffect(() => {
     const handleUserLogin = () => loadUser();
     window.addEventListener("userLogin", handleUserLogin);
@@ -110,7 +106,10 @@ const Layout = ({ children }) => {
         </nav>
       </header>
 
-      <main className="main-wrapper">{children}</main>
+      {/* ✅ Nội dung các trang sẽ hiển thị tại đây */}
+      <main className="main-wrapper" style={{ minHeight: "70vh" }}>
+        <Outlet />
+      </main>
 
       <footer className="footer">
         <div className="footer-content">

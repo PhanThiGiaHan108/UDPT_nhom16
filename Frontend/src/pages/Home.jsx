@@ -35,10 +35,10 @@ const Home = ({ popularCourses = [] }) => {
     <div>
       <section id="home" className="hero">
         <div className="hero-content fade-in-up">
-          <h1>Học trực tuyến thông minh</h1>
+          <h1>Học không giới hạn, phát triển không ngừng</h1>
           <p>
-            Khám phá hàng nghìn khóa học chất lượng cao từ các chuyên gia hàng
-            đầu. Học mọi lúc, mọi nơi với công nghệ hiện đại.
+            Kết nối tri thức – mở rộng tương lai. EduLearn giúp bạn học hiệu quả
+            hơn với công nghệ học tập thông minh.
           </p>
           <div className="hero-buttons">
             <a href="/courses" className="btn btn-primary btn-large">

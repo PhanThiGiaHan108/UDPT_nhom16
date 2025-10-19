@@ -1,24 +1,16 @@
 {
-  "name": "edulearn-backend",
+  "name": "edulearn-backend-root",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "seed": "node seed/adminSeeder.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.6.2",
-    "morgan": "^1.10.0"
+    "gateway": "cd api-gateway && npm run dev",
+    "auth": "cd auth-service && npm run dev",
+    "course": "cd course-service && npm run dev",
+    "enroll": "cd enroll-service && npm run dev",
+    "payment": "cd payment-service && npm run dev",
+    "dev": "npm-run-all --parallel gateway auth course enroll payment"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "npm-run-all": "^4.1.5"
   }
 }

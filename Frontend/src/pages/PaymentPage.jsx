@@ -1,47 +1,11 @@
-import React from "react";
 import { useParams } from "react-router-dom";
-import Payment from "./Payment";
-
-// Dữ liệu mẫu khóa học (nên lấy từ API hoặc context)
-const sampleCourses = [
-  {
-    id: 1,
-    icon: "fas fa-laptop-code",
-    category: "Công nghệ",
-    title: "React cho người mới",
-    description: "Bắt đầu hành trình học React từ cơ bản tới nâng cao.",
-    duration: "12 giờ",
-    students: 1240,
-    rating: 4.8,
-    price: 199000,
-  },
-  {
-    id: 2,
-    icon: "fas fa-briefcase",
-    category: "Kinh doanh",
-    title: "Quản trị doanh nghiệp",
-    description: "Kỹ năng quản trị và lãnh đạo hiệu quả.",
-    duration: "8 giờ",
-    students: 980,
-    rating: 4.6,
-    price: 149000,
-  },
-  {
-    id: 3,
-    icon: "fas fa-paint-brush",
-    category: "Sáng tạo",
-    title: "Thiết kế UI/UX",
-    description: "Thiết kế giao diện người dùng chuyên nghiệp.",
-    duration: "10 giờ",
-    students: 860,
-    rating: 4.7,
-    price: 179000,
-  },
-];
 
 const PaymentPage = () => {
   const { id } = useParams();
-  const course = sampleCourses.find((c) => String(c.id) === String(id));
+  // TODO: Fetch course từ API bằng id
+  const course = null;
+
+  // TODO: Tích hợp thanh toán PayOs tại đây
 
   if (!course) {
     return (
@@ -52,7 +16,66 @@ const PaymentPage = () => {
     );
   }
 
-  return <Payment course={course} />;
+  return (
+    <section className="payment-section">
+      <div className="container">
+        <div className="payment-wrapper">
+          <div className="payment-header">
+            <h1>Thanh toán khóa học</h1>
+            <p className="muted">Hoàn tất thanh toán để bắt đầu học ngay</p>
+          </div>
+
+          {/* Thông tin khoá học */}
+          <div className="payment-card">
+            <div className="course-summary">
+              <div className="course-summary-icon">
+                <i className={course.icon || "fas fa-book"}></i>
+              </div>
+              <div className="course-summary-details">
+                <h2>{course.title}</h2>
+                <div className="course-summary-meta">
+                  <span>
+                    <i className="fas fa-clock"></i> {course.duration}
+                  </span>
+                  <span>
+                    <i className="fas fa-users"></i> {course.students} học viên
+                  </span>
+                  <span>
+                    <i className="fas fa-star"></i> {course.rating}/5
+                  </span>
+                </div>
+                {course.description && (
+                  <p className="course-summary-desc">{course.description}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="payment-divider"></div>
+
+            <div className="payment-details">
+              <div className="payment-row">
+                <span>Giá khóa học:</span>
+                <strong>{course.price?.toLocaleString("vi-VN")}đ</strong>
+              </div>
+              <div className="payment-row">
+                <span>Phí xử lý:</span>
+                <strong>0đ</strong>
+              </div>
+              <div className="payment-divider"></div>
+              <div className="payment-row payment-total">
+                <span>Tổng cộng:</span>
+                <strong className="total-price">
+                  {course.price?.toLocaleString("vi-VN")}đ
+                </strong>
+              </div>
+            </div>
+
+            {/* TODO: Tích hợp nút và giao diện thanh toán PayOs tại đây */}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default PaymentPage;
