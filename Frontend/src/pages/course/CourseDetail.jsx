@@ -238,6 +238,50 @@ const CourseDetail = () => {
                         )}
                       </div>
                     )}
+                    {/* Header giống ảnh mẫu: tiêu đề + nút mở rộng/thu gọn, và dòng tổng quan */}
+                    <div
+                      className="curriculum-header"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        margin: "8px 0",
+                      }}
+                    >
+                      <h2 style={{ margin: 0 }}>Nội dung khóa học</h2>
+                      <button
+                        className="btn-link"
+                        onClick={() => {
+                          const total = course.curriculum?.length || 0;
+                          if (expandedSections.length === total) {
+                            setExpandedSections([]);
+                          } else {
+                            setExpandedSections(
+                              Array.from({ length: total }, (_, i) => i)
+                            );
+                          }
+                        }}
+                        style={{ color: "#7b2ff2" }}
+                      >
+                        {expandedSections.length ===
+                        (course.curriculum?.length || 0)
+                          ? "Thu gọn tất cả"
+                          : "Mở rộng tất cả các phần"}
+                      </button>
+                    </div>
+                    <p style={{ color: "#6b7280", margin: "0 0 8px" }}>
+                      {course.curriculum?.length || 0} phần •{" "}
+                      {(course.curriculum || []).reduce(
+                        (acc, s) =>
+                          acc +
+                          (s.lectures ||
+                            (s.lessons ? s.lessons.length : 0) ||
+                            0),
+                        0
+                      )}{" "}
+                      bài giảng • {course.duration || ""} tổng thời lượng
+                    </p>
                     <div className="curriculum-list">
                       {(course.curriculum || []).map((section, idx) => {
                         const isExpanded = expandedSections.includes(idx);
@@ -282,6 +326,13 @@ const CourseDetail = () => {
                                       <div
                                         key={lessonIdx}
                                         className="lesson-item"
+                                        style={{
+                                          display: "grid",
+                                          gridTemplateColumns: "1fr auto",
+                                          alignItems: "center",
+                                          padding: "12px 16px",
+                                          borderTop: "1px solid #eee",
+                                        }}
                                       >
                                         <div className="lesson-title">
                                           <i className="fas fa-play-circle"></i>{" "}
@@ -334,6 +385,7 @@ const CourseDetail = () => {
                                               style={{
                                                 marginTop: 12,
                                                 textAlign: "center",
+                                                gridColumn: "1 / -1",
                                               }}
                                             >
                                               {lesson.videoUrl.includes(

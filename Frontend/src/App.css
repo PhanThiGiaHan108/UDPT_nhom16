@@ -230,3 +230,122 @@
 .read-the-docs {
   color: #888;
 }
+
+/* ===========================
+   Curriculum (Udemy-like)
+   =========================== */
+.curriculum-content .curriculum-header {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+}
+.curriculum-list .curriculum-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.curriculum-section .section-header {
+  background: #f9fafb;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+.curriculum-section .section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.curriculum-section .section-lessons {
+  background: #fff;
+}
+.lesson-row:hover {
+  background: #fafafa;
+}
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ===========================
+   Preview Modal
+   =========================== */
+.preview-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.preview-modal {
+  width: min(920px, 92vw);
+  background: #0f172a;
+  color: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+.preview-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+}
+.preview-modal-title .subtitle {
+  font-size: 14px;
+  color: #cbd5e1;
+}
+.preview-modal-title .title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+}
+.preview-modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+}
+.preview-modal-body {
+  background: #111827;
+  padding: 12px 18px 18px 18px;
+}
+.preview-modal-list {
+  background: #0f172a;
+  padding: 12px 18px 18px 18px;
+}
+.preview-modal-list .list-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.preview-list-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 6px;
+  background: transparent;
+  color: #e5e7eb;
+  border: none;
+  cursor: pointer;
+}
+.preview-list-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.preview-list-row.active {
+  background: rgba(123, 47, 242, 0.25);
+}
+.preview-list-row .list-item-title {
+  text-align: left;
+}
+.preview-list-row .list-item-time {
+  color: #cbd5e1;
+}
