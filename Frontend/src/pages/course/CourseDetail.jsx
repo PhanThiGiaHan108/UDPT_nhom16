@@ -1,107 +1,96 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 
-// Giao diện chi tiết khóa học - tiếng Việt
-const CourseDetail = ({
-  title = "Lập trình React từ cơ bản đến nâng cao",
-  description = "Khóa học giúp bạn làm chủ React và xây dựng ứng dụng thực tế.",
-  category = "Lập trình web",
-  rating = 4.7,
-  students = 1200,
-  duration = "20 giờ",
-  level = "Trung cấp",
-  instructor = "Nguyễn Văn A",
-  instructorTitle = "Senior Frontend Developer",
-  instructorBio = "Giảng viên có 10 năm kinh nghiệm phát triển web với React, Node.js.",
-  price = 199000,
-  lectures = 45,
-  assignments = 12,
-  certificate = true,
-  icon = "fas fa-laptop-code",
-  defaultCourse = { id: 1 },
-  fullDescription = "Khóa học này cung cấp kiến thức từ cơ bản đến nâng cao về React, giúp bạn tự tin xây dựng các ứng dụng web hiện đại.",
-  learningOutcomes = [
-    "Hiểu rõ về React và cách hoạt động",
-    "Xây dựng giao diện web chuyên nghiệp",
-    "Quản lý state hiệu quả",
-    "Kết nối API và xử lý dữ liệu",
-    "Triển khai ứng dụng lên môi trường thực tế",
-  ],
-  requirements = [
-    "Biết sử dụng máy tính cơ bản",
-    "Có kiến thức HTML, CSS, JavaScript cơ bản",
-  ],
-  curriculum = [
-    {
-      section: "Giới thiệu React",
-      lectures: 5,
-      duration: "2 giờ",
-      lessons: [
-        { title: "React là gì?", duration: "20 phút", free: true },
-        { title: "Cài đặt môi trường", duration: "25 phút" },
-      ],
-    },
-    {
-      section: "Component & Props",
-      lectures: 10,
-      duration: "4 giờ",
-      lessons: [
-        { title: "Tạo component đầu tiên", duration: "30 phút" },
-        { title: "Truyền props", duration: "35 phút", free: true },
-      ],
-    },
-  ],
-  reviews = [
-    {
-      id: 1,
-      name: "Trần B",
-      rating: 5,
-      date: "10/10/2025",
-      comment: "Khóa học rất hữu ích, giảng viên nhiệt tình!",
-    },
-    {
-      id: 2,
-      name: "Lê C",
-      rating: 4,
-      date: "12/10/2025",
-      comment: "Nội dung dễ hiểu, thực hành nhiều.",
-    },
-  ],
-  language = "Tiếng Việt",
-  lastUpdated = "10/2025",
-}) => {
+const CourseDetail = () => {
+  const { id } = useParams();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+  // Track which section's first lesson video is open
+  const [openPreviewSection, setOpenPreviewSection] = useState(null);
+  // Track which sections are expanded (collapsed by default)
+  const [expandedSections, setExpandedSections] = useState([]);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`http://localhost:5002/api/courses/${id}`);
+        const data = await res.json();
+        if (data && data._id) {
+          setCourse(data);
+        } else {
+          setError(data?.message || "Không tìm thấy khóa học!");
+        }
+      } catch {
+        setError("Không thể tải chi tiết khóa học!");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourse();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", padding: 40 }}>
+        Đang tải chi tiết khóa học...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div style={{ textAlign: "center", color: "red", padding: 40 }}>
+        {error} • <Link to="/courses">Quay lại danh sách</Link>
+      </div>
+    );
+  }
+  if (!course) {
+    return (
+      <div style={{ textAlign: "center", padding: 40 }}>
+        Không tìm thấy khóa học! • <Link to="/courses">Quay lại danh sách</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="course-detail-page">
-      {/* Hero Section */}
       <section className="course-detail-hero compact">
         <div className="container">
           <div className="course-detail-header">
             <div className="course-detail-info">
               <div className="course-breadcrumb">
-                <a href="/courses">Khóa học</a>
-                <i className="fas fa-chevron-right"></i>
-                <span>{category}</span>
+                <Link to="/courses">Khóa học</Link>
+                <i
+                  className="fas fa-chevron-right"
+                  style={{ margin: "0 8px" }}
+                />
+                <span>{course.category}</span>
               </div>
-              <h2>{title}</h2>
-              <p className="course-subtitle">{description}</p>
+              <h2>{course.title}</h2>
+              <p className="course-subtitle">{course.description}</p>
               <div className="course-stats">
                 <div className="stat-item">
                   <i className="fas fa-star"></i>
-                  <span className="rating-number">{rating}</span>
-                  <span className="rating-count">({students} đánh giá)</span>
+                  <span className="rating-number">{course.rating || 4.5}</span>
+                  <span className="rating-count">
+                    ({course.students || 0} đánh giá)
+                  </span>
                 </div>
                 <div className="stat-item">
                   <i className="fas fa-users"></i>
-                  <span>{students.toLocaleString("vi-VN")} học viên</span>
+                  <span>
+                    {(course.students || 0).toLocaleString("vi-VN")} học viên
+                  </span>
                 </div>
                 <div className="stat-item">
                   <i className="fas fa-clock"></i>
-                  <span>{duration}</span>
+                  <span>{course.duration || "20 giờ"}</span>
                 </div>
                 <div className="stat-item">
                   <i className="fas fa-signal"></i>
-                  <span>{level}</span>
+                  <span>{course.level || "Trung cấp"}</span>
                 </div>
               </div>
               <div className="instructor-info">
@@ -110,81 +99,13 @@ const CourseDetail = ({
                 </div>
                 <div className="instructor-details">
                   <span className="instructor-label">Giảng viên</span>
-                  <span className="instructor-name">{instructor}</span>
-                </div>
-              </div>
-            </div>
-            <div className="course-detail-card">
-              <div className="course-card-preview">
-                <div className="course-preview-icon">
-                  <i className={icon}></i>
-                </div>
-              </div>
-              <div className="course-card-body">
-                <div className="course-price-box">
-                  <span className="course-price-main">
-                    {price.toLocaleString("vi-VN")}đ
+                  <span className="instructor-name">
+                    {course.instructor || "Chưa cập nhật"}
                   </span>
-                  <span className="course-price-old">299.000đ</span>
-                  <span className="course-discount">-33%</span>
-                </div>
-                <a
-                  href={`/payment/${defaultCourse.id}`}
-                  className="btn btn-enroll"
-                >
-                  <i className="fas fa-shopping-cart"></i> Đăng ký ngay
-                </a>
-                <div className="course-includes">
-                  <h4>Khóa học bao gồm:</h4>
-                  <ul>
-                    <li>
-                      <i className="fas fa-play-circle"></i> {lectures} bài
-                      giảng
-                    </li>
-                    <li>
-                      <i className="fas fa-tasks"></i> {assignments} bài tập
-                    </li>
-                    <li>
-                      <i className="fas fa-infinity"></i> Truy cập trọn đời
-                    </li>
-                    <li>
-                      <i className="fas fa-mobile-alt"></i> Học trên mọi thiết
-                      bị
-                    </li>
-                    {certificate && (
-                      <li>
-                        <i className="fas fa-certificate"></i> Chứng chỉ hoàn
-                        thành
-                      </li>
-                    )}
-                    <li>
-                      <i className="fas fa-headset"></i> Hỗ trợ trực tuyến
-                    </li>
-                  </ul>
-                </div>
-                <div className="course-share">
-                  <button className="btn-share">
-                    <i className="fas fa-share-alt"></i> Chia sẻ
-                  </button>
-                  <button className="btn-wishlist">
-                    <i className="fas fa-heart"></i>
-                  </button>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="course-detail-content">
-        <div className="container">
-          <div
-            className="content-wrapper"
-            style={{ display: "flex", gap: "32px" }}
-          >
-            <div className="content-main" style={{ flex: 1 }}>
-              <div className="course-tabs">
+              {/* Tabs moved here under instructor name */}
+              <div className="course-tabs" style={{ marginTop: 24 }}>
                 <button
                   className={`tab-btn ${
                     activeTab === "overview" ? "active" : ""
@@ -218,17 +139,18 @@ const CourseDetail = ({
                   Đánh giá
                 </button>
               </div>
-              <div className="tab-content">
+
+              <div className="tab-content" style={{ marginTop: 12 }}>
                 {activeTab === "overview" && (
                   <div className="overview-content">
                     <div className="content-section">
                       <h2>Mô tả khóa học</h2>
-                      <p>{fullDescription}</p>
+                      <p>{course.fullDescription || course.description}</p>
                     </div>
                     <div className="content-section">
                       <h2>Bạn sẽ học được gì?</h2>
                       <div className="learning-outcomes">
-                        {learningOutcomes.map((outcome, idx) => (
+                        {(course.learningOutcomes || []).map((outcome, idx) => (
                           <div key={idx} className="outcome-item">
                             <i className="fas fa-check-circle"></i>
                             <span>{outcome}</span>
@@ -239,56 +161,247 @@ const CourseDetail = ({
                     <div className="content-section">
                       <h2>Yêu cầu</h2>
                       <ul className="requirements-list">
-                        {requirements.map((req, idx) => (
+                        {(course.requirements || []).map((req, idx) => (
                           <li key={idx}>{req}</li>
                         ))}
                       </ul>
                     </div>
                   </div>
                 )}
+
                 {activeTab === "curriculum" && (
                   <div className="curriculum-content">
-                    <div className="curriculum-header">
-                      <h2>Nội dung khóa học</h2>
-                      <p>
-                        {curriculum.length} phần • {lectures} bài giảng •{" "}
-                        {duration} tổng thời lượng
-                      </p>
-                    </div>
+                    {course.previewVideo && (
+                      <div
+                        className="course-preview-video"
+                        style={{
+                          marginBottom: 30,
+                          padding: 20,
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: 8,
+                          textAlign: "center",
+                        }}
+                      >
+                        <h3
+                          style={{
+                            marginBottom: 15,
+                            fontSize: 18,
+                            fontWeight: 600,
+                            color: "#333",
+                          }}
+                        >
+                          Video giới thiệu khóa học
+                        </h3>
+                        {course.previewVideo.includes("youtube.com") ||
+                        course.previewVideo.includes("youtu.be") ? (
+                          <iframe
+                            width="640"
+                            height="360"
+                            src={
+                              course.previewVideo.includes("watch?v=")
+                                ? course.previewVideo.replace(
+                                    "watch?v=",
+                                    "embed/"
+                                  )
+                                : course.previewVideo.replace(
+                                    "youtu.be/",
+                                    "youtube.com/embed/"
+                                  )
+                            }
+                            title="Course preview video"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{
+                              borderRadius: 8,
+                              boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+                              maxWidth: "100%",
+                            }}
+                          ></iframe>
+                        ) : (
+                          <video
+                            width="640"
+                            height="360"
+                            controls
+                            style={{
+                              borderRadius: 8,
+                              boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+                              maxWidth: "100%",
+                            }}
+                          >
+                            <source
+                              src={course.previewVideo}
+                              type="video/mp4"
+                            />
+                            Trình duyệt của bạn không hỗ trợ video.
+                          </video>
+                        )}
+                      </div>
+                    )}
                     <div className="curriculum-list">
-                      {curriculum.map((section, idx) => (
-                        <div key={idx} className="curriculum-section">
-                          <div className="section-header">
-                            <div className="section-title">
-                              <i className="fas fa-folder"></i>{" "}
-                              <span>{section.section}</span>
-                            </div>
-                            <div className="section-info">
-                              {section.lectures} bài giảng • {section.duration}
-                            </div>
-                          </div>
-                          <div className="section-lessons">
-                            {section.lessons.map((lesson, lessonIdx) => (
-                              <div key={lessonIdx} className="lesson-item">
-                                <div className="lesson-title">
-                                  <i className="fas fa-play-circle"></i>{" "}
-                                  <span>{lesson.title}</span>
-                                  {lesson.free && (
-                                    <span className="lesson-free">Xem thử</span>
-                                  )}
-                                </div>
-                                <div className="lesson-duration">
-                                  <i className="far fa-clock"></i>{" "}
-                                  {lesson.duration}
-                                </div>
+                      {(course.curriculum || []).map((section, idx) => {
+                        const isExpanded = expandedSections.includes(idx);
+                        return (
+                          <div key={idx} className="curriculum-section">
+                            <div
+                              className="section-header"
+                              onClick={() => {
+                                setExpandedSections((prev) =>
+                                  prev.includes(idx)
+                                    ? prev.filter((i) => i !== idx)
+                                    : [...prev, idx]
+                                );
+                              }}
+                              style={{ cursor: "pointer" }}
+                            >
+                              <div className="section-title">
+                                <i
+                                  className={`fas fa-chevron-${
+                                    isExpanded ? "down" : "right"
+                                  }`}
+                                  style={{
+                                    marginRight: 8,
+                                    fontSize: 12,
+                                    transition: "transform 0.3s ease",
+                                  }}
+                                ></i>
+                                <i className="fas fa-folder"></i>{" "}
+                                <span>{section.section}</span>
                               </div>
-                            ))}
+                              <div className="section-info">
+                                {section.lectures} bài giảng •{" "}
+                                {section.duration}
+                              </div>
+                            </div>
+                            {isExpanded && (
+                              <div className="section-lessons">
+                                {(section.lessons || []).map(
+                                  (lesson, lessonIdx) => {
+                                    const isFirst = lessonIdx === 0;
+                                    return (
+                                      <div
+                                        key={lessonIdx}
+                                        className="lesson-item"
+                                      >
+                                        <div className="lesson-title">
+                                          <i className="fas fa-play-circle"></i>{" "}
+                                          <span>{lesson.title}</span>
+                                          {isFirst ? (
+                                            <span
+                                              className="lesson-free"
+                                              style={{
+                                                cursor: lesson.videoUrl
+                                                  ? "pointer"
+                                                  : "default",
+                                                color: lesson.videoUrl
+                                                  ? "#007bff"
+                                                  : undefined,
+                                                marginLeft: 8,
+                                              }}
+                                              onClick={() =>
+                                                lesson.videoUrl &&
+                                                setOpenPreviewSection(
+                                                  openPreviewSection === idx
+                                                    ? null
+                                                    : idx
+                                                )
+                                              }
+                                            >
+                                              Xem thử
+                                            </span>
+                                          ) : (
+                                            <span
+                                              className="lesson-locked"
+                                              style={{
+                                                color: "#888",
+                                                marginLeft: 8,
+                                              }}
+                                            >
+                                              <i className="fas fa-lock"></i> Đã
+                                              khóa
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="lesson-duration">
+                                          <i className="far fa-clock"></i>{" "}
+                                          {lesson.duration}
+                                        </div>
+                                        {isFirst &&
+                                          lesson.videoUrl &&
+                                          openPreviewSection === idx && (
+                                            <div
+                                              className="lesson-video-preview"
+                                              style={{
+                                                marginTop: 12,
+                                                textAlign: "center",
+                                              }}
+                                            >
+                                              {lesson.videoUrl.includes(
+                                                "youtube.com"
+                                              ) ||
+                                              lesson.videoUrl.includes(
+                                                "youtu.be"
+                                              ) ? (
+                                                <iframe
+                                                  width="640"
+                                                  height="360"
+                                                  src={
+                                                    lesson.videoUrl.includes(
+                                                      "watch?v="
+                                                    )
+                                                      ? lesson.videoUrl.replace(
+                                                          "watch?v=",
+                                                          "embed/"
+                                                        )
+                                                      : lesson.videoUrl.replace(
+                                                          "youtu.be/",
+                                                          "youtube.com/embed/"
+                                                        )
+                                                  }
+                                                  title="YouTube video preview"
+                                                  frameBorder="0"
+                                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                  allowFullScreen
+                                                  style={{
+                                                    borderRadius: 8,
+                                                    boxShadow:
+                                                      "0 2px 12px rgba(0,0,0,0.15)",
+                                                  }}
+                                                ></iframe>
+                                              ) : (
+                                                <video
+                                                  width="640"
+                                                  height="360"
+                                                  controls
+                                                  style={{
+                                                    borderRadius: 8,
+                                                    boxShadow:
+                                                      "0 2px 12px rgba(0,0,0,0.15)",
+                                                  }}
+                                                >
+                                                  <source
+                                                    src={lesson.videoUrl}
+                                                    type="video/mp4"
+                                                  />
+                                                  Trình duyệt của bạn không hỗ
+                                                  trợ video.
+                                                </video>
+                                              )}
+                                            </div>
+                                          )}
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
+
                 {activeTab === "instructor" && (
                   <div className="instructor-content">
                     <div className="instructor-profile">
@@ -296,41 +409,46 @@ const CourseDetail = ({
                         <i className="fas fa-user-circle"></i>
                       </div>
                       <div className="instructor-bio">
-                        <h2>{instructor}</h2>
+                        <h2>{course.instructor || "Chưa cập nhật"}</h2>
                         <p className="instructor-title-text">
-                          {instructorTitle}
+                          {course.instructorTitle || ""}
                         </p>
                         <div className="instructor-stats">
                           <div className="stat">
-                            <i className="fas fa-star"></i> {rating} Đánh giá
+                            <i className="fas fa-star"></i>{" "}
+                            {course.rating || 4.5} Đánh giá
                           </div>
                           <div className="stat">
                             <i className="fas fa-users"></i>{" "}
-                            {students.toLocaleString("vi-VN")} Học viên
+                            {(course.students || 0).toLocaleString("vi-VN")} Học
+                            viên
                           </div>
                           <div className="stat">
-                            <i className="fas fa-play-circle"></i> {lectures}{" "}
-                            Khóa học
+                            <i className="fas fa-play-circle"></i>{" "}
+                            {course.lectures || 0} Khóa học
                           </div>
                         </div>
                         <p className="instructor-description">
-                          {instructorBio}
+                          {course.instructorBio || ""}
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
+
                 {activeTab === "reviews" && (
                   <div className="reviews-content">
                     <div className="reviews-summary">
                       <div className="rating-overview">
-                        <div className="rating-number-large">{rating}</div>
+                        <div className="rating-number-large">
+                          {course.rating || 4.5}
+                        </div>
                         <div className="rating-stars">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <i
                               key={star}
                               className={`fas fa-star ${
-                                star <= rating ? "filled" : ""
+                                star <= (course.rating || 4.5) ? "filled" : ""
                               }`}
                             ></i>
                           ))}
@@ -339,8 +457,8 @@ const CourseDetail = ({
                       </div>
                     </div>
                     <div className="reviews-list">
-                      {reviews.map((review) => (
-                        <div key={review.id} className="review-item">
+                      {(course.reviews || []).map((review, idx) => (
+                        <div key={idx} className="review-item">
                           <div className="review-header">
                             <div className="reviewer-avatar">
                               <i className="fas fa-user-circle"></i>
@@ -372,63 +490,51 @@ const CourseDetail = ({
                 )}
               </div>
             </div>
-            <div className="content-sidebar" style={{ width: "260px" }}>
-              <div className="sidebar-card">
-                <h3>Thông tin khóa học</h3>
-                <ul className="course-info-list">
-                  <li>
-                    <i className="fas fa-language"></i>{" "}
-                    <div>
-                      <strong>Ngôn ngữ</strong> <span>{language}</span>
-                    </div>
-                  </li>
-                  <li>
-                    <i className="fas fa-calendar-alt"></i>{" "}
-                    <div>
-                      <strong>Cập nhật</strong> <span>{lastUpdated}</span>
-                    </div>
-                  </li>
-                  <li>
-                    <i className="fas fa-signal"></i>{" "}
-                    <div>
-                      <strong>Trình độ</strong> <span>{level}</span>
-                    </div>
-                  </li>
-                  <li>
-                    <i className="fas fa-play-circle"></i>{" "}
-                    <div>
-                      <strong>Bài giảng</strong> <span>{lectures} bài</span>
-                    </div>
-                  </li>
-                  <li>
-                    <i className="fas fa-tasks"></i>{" "}
-                    <div>
-                      <strong>Bài tập</strong> <span>{assignments} bài</span>
-                    </div>
-                  </li>
-                  <li>
-                    <i className="fas fa-certificate"></i>{" "}
-                    <div>
-                      <strong>Chứng chỉ</strong>{" "}
-                      <span>{certificate ? "Có" : "Không"}</span>
-                    </div>
-                  </li>
-                </ul>
+            <div className="course-detail-card">
+              <div className="course-card-preview">
+                <div className="course-preview-icon">
+                  <i className={course.icon || "fas fa-laptop-code"}></i>
+                </div>
               </div>
-              <div className="sidebar-card">
-                <h3>Khóa học liên quan</h3>
-                <div className="related-courses">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="related-course-item">
-                      <div className="related-course-icon">
-                        <i className="fas fa-code"></i>
-                      </div>
-                      <div className="related-course-info">
-                        <h4>Khóa học {i}</h4>
-                        <p className="related-course-price">199.000đ</p>
-                      </div>
-                    </div>
-                  ))}
+              <div className="course-card-body">
+                <div className="course-price-box">
+                  <span className="course-price-main">
+                    {(course.price || 0).toLocaleString("vi-VN")}đ
+                  </span>
+                </div>
+                <a href={`/payment/${course._id}`} className="btn btn-enroll">
+                  <i className="fas fa-shopping-cart"></i> Đăng ký ngay
+                </a>
+                <div className="course-includes">
+                  <h4>Khóa học bao gồm:</h4>
+                  <ul>
+                    <li>
+                      <i className="fas fa-play-circle"></i>{" "}
+                      {course.lectures || 0} bài giảng
+                    </li>
+                    <li>
+                      <i className="fas fa-tasks"></i> {course.assignments || 0}{" "}
+                      bài tập
+                    </li>
+                    <li>
+                      <i className="fas fa-infinity"></i> Truy cập trọn đời
+                    </li>
+                    <li>
+                      <i className="fas fa-mobile-alt"></i> Học trên mọi thiết
+                      bị
+                    </li>
+                    <li>
+                      <i className="fas fa-headset"></i> Hỗ trợ trực tuyến
+                    </li>
+                  </ul>
+                </div>
+                <div className="course-share">
+                  <button className="btn-share">
+                    <i className="fas fa-share-alt"></i> Chia sẻ
+                  </button>
+                  <button className="btn-wishlist">
+                    <i className="fas fa-heart"></i>
+                  </button>
                 </div>
               </div>
             </div>

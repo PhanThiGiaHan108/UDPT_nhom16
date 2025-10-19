@@ -9,7 +9,6 @@ import MyCourses from "../pages/course/MyCourses";
 import About from "../pages/infor/About";
 import Contact from "../pages/infor/Contact";
 import Features from "../pages/infor/Features";
-import PaymentPage from "../pages/PaymentPage";
 import Profile from "../pages/profile/Profile";
 import Settings from "../pages/profile/Settings";
 import Login from "../pages/auth/Login";
@@ -26,12 +25,11 @@ const AppRouter = () => {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/course/:id" element={<CourseDetail />} />
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/payment/:id" element={<PaymentPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
         </Route>

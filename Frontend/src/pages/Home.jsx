@@ -1,6 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const Home = ({ popularCourses = [] }) => {
+const Home = () => {
+  const [popularCourses, setPopularCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch popular courses from backend (sorted by students count)
+    const fetchPopularCourses = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("http://localhost:5002/api/courses", {
+          params: { limit: 6, sort: "students" }, // Lấy 6 khóa có nhiều học viên nhất
+        });
+        setPopularCourses(res.data.data || []);
+      } catch (err) {
+        console.error("Không thể tải khóa học phổ biến:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPopularCourses();
+  }, []);
+
   useEffect(() => {
     // Smooth scrolling for anchor links
     const anchors = document.querySelectorAll('a[href^="#"]');
@@ -73,26 +95,7 @@ const Home = ({ popularCourses = [] }) => {
                 hình ảnh sắc nét để đảm bảo trải nghiệm học tập tốt nhất.
               </p>
             </div>
-            <div className="feature-card fade-in-up">
-              <div className="feature-icon">
-                <i className="fas fa-certificate"></i>
-              </div>
-              <h3>Chứng chỉ được công nhận</h3>
-              <p>
-                Nhận chứng chỉ hoàn thành khóa học được công nhận bởi các doanh
-                nghiệp và tổ chức giáo dục uy tín.
-              </p>
-            </div>
-            <div className="feature-card fade-in-up">
-              <div className="feature-icon">
-                <i className="fas fa-users"></i>
-              </div>
-              <h3>Cộng đồng học tập</h3>
-              <p>
-                Tham gia cộng đồng học viên sôi động, thảo luận và chia sẻ kinh
-                nghiệm với những người cùng chí hướng.
-              </p>
-            </div>
+
             <div className="feature-card fade-in-up">
               <div className="feature-icon">
                 <i className="fas fa-mobile-alt"></i>
@@ -101,16 +104,6 @@ const Home = ({ popularCourses = [] }) => {
               <p>
                 Truy cập khóa học trên mọi thiết bị - máy tính, tablet, điện
                 thoại. Học offline với tính năng tải xuống.
-              </p>
-            </div>
-            <div className="feature-card fade-in-up">
-              <div className="feature-icon">
-                <i className="fas fa-headset"></i>
-              </div>
-              <h3>Hỗ trợ 24/7</h3>
-              <p>
-                Đội ngũ hỗ trợ chuyên nghiệp sẵn sàng giải đáp mọi thắc mắc của
-                bạn bất cứ lúc nào trong ngày.
               </p>
             </div>
             <div className="feature-card fade-in-up">
@@ -136,46 +129,55 @@ const Home = ({ popularCourses = [] }) => {
               nghệ, kinh doanh và sáng tạo
             </p>
           </div>
-          <div className="courses-grid">
-            {popularCourses.map((course, idx) => (
-              <div key={course.id || idx} className="course-card fade-in-up">
-                <div className="course-image">
-                  <i className={course.icon}></i>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: 40, color: "#6b7280" }}>
+              Đang tải khóa học phổ biến...
+            </div>
+          ) : (
+            <div className="courses-grid">
+              {popularCourses.map((course, idx) => (
+                <div key={course._id || idx} className="course-card fade-in-up">
+                  <div className="course-image">
+                    <i className={course.icon}></i>
+                  </div>
+                  <div className="course-content">
+                    <span className="course-category">{course.category}</span>
+                    <h3 className="course-title">{course.title}</h3>
+                    <p className="course-description">{course.description}</p>
+                    <div className="course-meta">
+                      <span>
+                        <i className="fas fa-clock"></i> {course.duration}
+                      </span>
+                      <span>
+                        <i className="fas fa-users"></i> {course.students} học
+                        viên
+                      </span>
+                      <span>
+                        <i className="fas fa-star"></i> {course.rating}/5
+                      </span>
+                    </div>
+                    <div className="course-price">
+                      {course.price?.toLocaleString("vi-VN")}đ
+                    </div>
+                    <div className="course-actions">
+                      <a
+                        href={`/payment/${course._id}`}
+                        className="btn btn-register"
+                      >
+                        Đăng ký ngay
+                      </a>
+                      <a
+                        href={`/course/${course._id}`}
+                        className="btn btn-info"
+                      >
+                        <i className="fas fa-info-circle"></i> Chi tiết
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <div className="course-content">
-                  <span className="course-category">{course.category}</span>
-                  <h3 className="course-title">{course.title}</h3>
-                  <p className="course-description">{course.description}</p>
-                  <div className="course-meta">
-                    <span>
-                      <i className="fas fa-clock"></i> {course.duration}
-                    </span>
-                    <span>
-                      <i className="fas fa-users"></i> {course.students} học
-                      viên
-                    </span>
-                    <span>
-                      <i className="fas fa-star"></i> {course.rating}/5
-                    </span>
-                  </div>
-                  <div className="course-price">
-                    {course.price?.toLocaleString("vi-VN")}đ
-                  </div>
-                  <div className="course-actions">
-                    <a
-                      href={`/payment/${course.id}`}
-                      className="btn btn-register"
-                    >
-                      Đăng ký ngay
-                    </a>
-                    <a href={`/course/${course.id}`} className="btn btn-info">
-                      <i className="fas fa-info-circle"></i> Chi tiết
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
