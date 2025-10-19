@@ -16,6 +16,7 @@ import Register from "../pages/auth/Register";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminCourses from "../pages/admin/AdminCourses";
 import AdminUsers from "../pages/admin/AdminUsers";
+import PaymentResultPage from "../pages/payment/PaymentResultPage";
 
 const AppRouter = () => {
   return (
@@ -40,6 +41,7 @@ const AppRouter = () => {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/courses" element={<AdminCourses />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/payment/:id" element={<PaymentResultPage />} />
 
         {/* 404 */}
         <Route

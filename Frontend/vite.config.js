@@ -13,8 +13,13 @@ export default defineConfig({
   server: {
     port: 5173, // cổng mặc định
     proxy: {
+      "/api/payment": {
+        target: "http://localhost:5004", // địa chỉ payment service
+        changeOrigin: true,
+        secure: false,
+      },
       "/api": {
-        target: "http://localhost:5000", // địa chỉ backend
+        target: "http://localhost:5000", // địa chỉ backend chung
         changeOrigin: true,
         secure: false,
       },
