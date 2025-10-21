@@ -62,3 +62,32 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi đăng nhập!" });
   }
 };
+
+// ✅ Get current user info
+export const getMe = async (req, res) => {
+  try {
+    // req.user đã được set bởi verifyToken middleware
+    res.json({
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      },
+    });
+  } catch (err) {
+    console.error("GetMe error:", err);
+    res.status(500).json({ message: "Lỗi server!" });
+  }
+};
+
+// ✅ Get all users (Admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    res.json({ users });
+  } catch (err) {
+    console.error("GetAllUsers error:", err);
+    res.status(500).json({ message: "Lỗi server khi lấy danh sách users!" });
+  }
+};

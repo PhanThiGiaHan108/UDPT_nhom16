@@ -25,7 +25,9 @@ app.use(
 app.use(
   "/api/courses",
   proxy("http://localhost:5002", {
-    proxyReqPathResolver: (req) => req.originalUrl.replace("/api/courses", ""),
+    proxyReqPathResolver: (req) => {
+      return req.originalUrl; // giữ nguyên /api/courses/*
+    },
   })
 );
 
