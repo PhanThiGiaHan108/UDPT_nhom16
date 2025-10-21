@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom"; // ✅ THÊM DÒNG NÀY
+import api from "../services/api";
 
 const Layout = () => {
   const [user, setUser] = useState(null);
@@ -30,11 +31,33 @@ const Layout = () => {
   }, []);
 
   const toggleUserMenu = () => setUserMenuOpen(!userMenuOpen);
+  const logoutInProgress = useRef(false);
 
   const handleLogout = () => {
+    if (logoutInProgress.current) return;
+    logoutInProgress.current = true;
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    // Remove any default axios Authorization header (if set elsewhere)
+    try {
+      if (
+        api &&
+        api.defaults &&
+        api.defaults.headers &&
+        api.defaults.headers.common
+      ) {
+        delete api.defaults.headers.common["Authorization"];
+      }
+    } catch {
+      // ignore
+    }
+
+    // Notify other parts of the app (same-tab listeners) and other tabs
+    window.dispatchEvent(new Event("userLogout"));
+    window.dispatchEvent(new Event("storage"));
+
+    // Redirect to login
     window.location.href = "/login";
   };
 
@@ -81,11 +104,14 @@ const Layout = () => {
                   <a href="/settings">Cài đặt</a>
                   {user.role === "admin" && <a href="/admin">Quản trị</a>}
                   <a
-                    href="#"
-                    onClick={(e) => {
+                    href="/login"
+                    onMouseDown={(e) => {
+                      // onMouseDown fires before the button loses focus (onBlur),
+                      // so it avoids the dropdown closing before the click handler runs.
                       e.preventDefault();
                       handleLogout();
                     }}
+                    onClick={(e) => e.preventDefault()}
                     className="logout-btn"
                   >
                     Đăng xuất

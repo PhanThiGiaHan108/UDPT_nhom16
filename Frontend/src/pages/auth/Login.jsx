@@ -1,9 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
+import "./auth.css";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const cardVariant = {
+    hidden: { x: 40, opacity: 0 },
+    enter: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.45, ease: [0.2, 0.9, 0.2, 1] },
+    },
+    exit: { x: -20, opacity: 0, transition: { duration: 0.2 } },
+  };
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState({ type: "", text: "" });
   const navigate = useNavigate();
@@ -59,7 +71,13 @@ const Login = () => {
       <section className="login-main">
         <div className="login-container">
           <div className="login-form-wrapper">
-            <div className="login-form-card">
+            <motion.div
+              className="login-form-card auth-card"
+              variants={cardVariant}
+              initial="hidden"
+              animate="enter"
+              exit="exit"
+            >
               <div className="login-form-header">
                 <h2>Đăng nhập</h2>
                 <p>Nhập thông tin tài khoản của bạn</p>
@@ -145,7 +163,7 @@ const Login = () => {
                   </a>
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>

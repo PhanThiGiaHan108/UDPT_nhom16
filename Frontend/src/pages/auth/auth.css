@@ -1,0 +1,31 @@
+/* Sliding animations for auth pages */
+.auth-anim-wrapper {
+  overflow: hidden;
+}
+
+.auth-card {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 400ms cubic-bezier(0.2, 0.9, 0.2, 1), opacity 300ms ease;
+}
+
+.auth-slide-in-left {
+  transform: translateX(-30px);
+  opacity: 0;
+}
+
+.auth-slide-in-right {
+  transform: translateX(30px);
+  opacity: 0;
+}
+
+/* When JS removes the initial class, element will transition to default (0,1) */
+.auth-card.enter {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Slight delay for stagger */
+.auth-card.enter.delay {
+  transition-delay: 80ms;
+}
