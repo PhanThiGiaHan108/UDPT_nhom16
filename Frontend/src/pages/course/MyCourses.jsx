@@ -5,6 +5,33 @@ const MyCourses = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  // Dữ liệu khóa học mẫu
+  const myCourses = [
+    {
+      id: 1,
+      title: "Lập trình React cơ bản",
+      description: "Khóa học giúp bạn nắm vững kiến thức cơ bản về React.",
+      category: "Lập trình",
+      icon: "fas fa-code",
+      progress: 75,
+      duration: "10 giờ",
+      rating: 4.5,
+      status: "Đang học",
+    },
+    {
+      id: 2,
+      title: "Thiết kế giao diện với Figma",
+      description:
+        "Khóa học hướng dẫn thiết kế giao diện người dùng chuyên nghiệp.",
+      category: "Thiết kế",
+      icon: "fas fa-paint-brush",
+      progress: 50,
+      duration: "8 giờ",
+      rating: 4.0,
+      status: "Đang học",
+    },
+  ];
+
   useEffect(() => {
     // Kiểm tra đăng nhập
     const token = localStorage.getItem("token");

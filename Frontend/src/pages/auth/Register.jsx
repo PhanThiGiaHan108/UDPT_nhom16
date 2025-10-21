@@ -1,21 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ✅ Thêm dòng này
-import { motion } from "framer-motion";
-
-import "./auth.css";
 
 const Register = () => {
   const navigate = useNavigate(); // ✅ Hook để điều hướng
-  const cardVariant = {
-    hidden: { x: -40, opacity: 0 },
-    enter: {
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.45, ease: [0.2, 0.9, 0.2, 1] },
-    },
-    exit: { x: 20, opacity: 0, transition: { duration: 0.2 } },
-  };
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -83,13 +71,7 @@ const Register = () => {
       <section className="register-main">
         <div className="register-container">
           <div className="register-form-wrapper">
-            <motion.div
-              className="register-form-card auth-card"
-              variants={cardVariant}
-              initial="hidden"
-              animate="enter"
-              exit="exit"
-            >
+            <div className="register-form-card">
               <h2>Đăng ký tài khoản</h2>
 
               {message.text && (
@@ -243,7 +225,7 @@ const Register = () => {
                   </a>
                 </p>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
