@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import axios from "axios";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -11,6 +12,18 @@ const CourseDetail = () => {
   const [openPreviewSection, setOpenPreviewSection] = useState(null);
   // Track which sections are expanded (collapsed by default)
   const [expandedSections, setExpandedSections] = useState([]);
+  // Track watched lessons: { [lessonId]: true }
+  const [watchedLessons, setWatchedLessons] = useState({});
+  // Get userId for localStorage key
+  const userStr = localStorage.getItem("user");
+  let userId = null;
+  try {
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      userId = user._id || user.id;
+    }
+  } catch {}
+  const watchedKey = userId && course ? `watched_${userId}_${course._id}` : null;
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -30,7 +43,49 @@ const CourseDetail = () => {
       }
     };
     fetchCourse();
+    // Also check enrollment for current user (so we can unlock lessons)
+    const checkEnrollment = async () => {
+      try {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return;
+        const user = JSON.parse(userStr);
+        const userId = user._id || user.id;
+        if (!userId) return;
+        const url = `http://localhost:5003/api/enroll/check?userId=${userId}&courseId=${id}`;
+        const r = await axios.get(url);
+        if (r?.data?.success && r?.data?.enrolled) {
+          setIsEnrolled(true);
+        }
+      } catch (err) {
+        // ignore - default is not enrolled
+        console.debug("Could not check enrollment:", err?.message || err);
+      }
+    };
+    checkEnrollment();
   }, [id]);
+
+  // Load watched lessons from localStorage when course loaded
+  useEffect(() => {
+    if (watchedKey) {
+      try {
+        const data = localStorage.getItem(watchedKey);
+        if (data) setWatchedLessons(JSON.parse(data));
+      } catch {}
+    }
+  }, [watchedKey]);
+
+  // Handler: mark lesson as watched
+  const handleMarkWatched = (lessonId) => {
+    if (!watchedKey || !lessonId) return;
+    setWatchedLessons((prev) => {
+      const updated = { ...prev, [lessonId]: true };
+      localStorage.setItem(watchedKey, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // whether the currently signed-in user is enrolled in this course
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   if (loading) {
     return (
@@ -334,10 +389,10 @@ const CourseDetail = () => {
                                           borderTop: "1px solid #eee",
                                         }}
                                       >
-                                        <div className="lesson-title">
+                                        <div className="lesson-title" style={{display:'flex',alignItems:'center',gap:8}}>
                                           <i className="fas fa-play-circle"></i>{" "}
                                           <span>{lesson.title}</span>
-                                          {isFirst ? (
+                                          {isFirst || isEnrolled ? (
                                             <span
                                               className="lesson-free"
                                               style={{
@@ -358,7 +413,7 @@ const CourseDetail = () => {
                                                 )
                                               }
                                             >
-                                              Xem thử
+                                              {isEnrolled ? "Xem bài học" : "Xem thử"}
                                             </span>
                                           ) : (
                                             <span
@@ -371,6 +426,27 @@ const CourseDetail = () => {
                                               <i className="fas fa-lock"></i> Đã
                                               khóa
                                             </span>
+                                          )}
+                                          {/* Nút Đã xem */}
+                                          {isEnrolled && lesson._id && (
+                                            <button
+                                              onClick={() => handleMarkWatched(lesson._id)}
+                                              style={{
+                                                marginLeft: 8,
+                                                padding: '2px 10px',
+                                                borderRadius: 6,
+                                                border: watchedLessons[lesson._id] ? '1px solid #10b981' : '1px solid #e5e7eb',
+                                                background: watchedLessons[lesson._id] ? '#10b981' : '#fff',
+                                                color: watchedLessons[lesson._id] ? '#fff' : '#111827',
+                                                fontSize: 12,
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                              }}
+                                              disabled={watchedLessons[lesson._id]}
+                                            >
+                                              {watchedLessons[lesson._id] ? 'Đã xem' : 'Đánh dấu đã xem'}
+                                            </button>
                                           )}
                                         </div>
                                         <div className="lesson-duration">
@@ -554,9 +630,11 @@ const CourseDetail = () => {
                     {(course.price || 0).toLocaleString("vi-VN")}đ
                   </span>
                 </div>
-                <a href={`/payment/${course._id}`} className="btn btn-enroll">
-                  <i className="fas fa-shopping-cart"></i> Đăng ký ngay
-                </a>
+                {!isEnrolled && (
+                  <a href={`/pay/${course._id}`} className="btn btn-enroll">
+                    <i className="fas fa-shopping-cart"></i> Đăng ký ngay
+                  </a>
+                )}
                 <div className="course-includes">
                   <h4>Khóa học bao gồm:</h4>
                   <ul>

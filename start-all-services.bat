@@ -6,7 +6,7 @@ echo.
 
 REM Start API Gateway (Port 5000)
 echo [1/5] Starting API Gateway on port 5000...
-start "API Gateway" cmd /k "cd Backend\api-gateway && node server.js"
+start "API Gateway" cmd /k "cd Backend\api-gateway && npm run dev"
 timeout /t 3 /nobreak >nul
 
 REM Start Auth Service (Port 5001)
@@ -21,7 +21,7 @@ timeout /t 3 /nobreak >nul
 
 REM Start Payment Service (Port 5004)
 echo [4/5] Starting Payment Service on port 5004...
-start "Payment Service" cmd /k "cd Backend\payment-service && node server.js"
+start "Payment Service" cmd /k "cd Backend\payment-service && npm run dev"
 timeout /t 3 /nobreak >nul
 
 REM Start Frontend (Port 5173)

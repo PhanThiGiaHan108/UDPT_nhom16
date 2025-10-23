@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 const Courses = () => {
   const [courses, setCourses] = useState([]); // all courses
+  const [enrolledIds, setEnrolledIds] = useState([]); // array of courseId strings
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
@@ -28,6 +30,26 @@ const Courses = () => {
       }
     };
     fetchCourses();
+    // If user logged in, fetch their enrollments so we can mark courses as enrolled
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const userId = user._id || user.id;
+        if (userId) {
+          axios
+            .get(`http://localhost:5003/api/enroll?userId=${userId}`)
+              .then((r) => {
+                const idsArr = (r.data.data || []).map((e) => e.courseId);
+                console.debug('Loaded enrolledIds', idsArr);
+                setEnrolledIds(idsArr);
+              })
+            .catch(() => {});
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
   }, []);
 
   // Debounce input tìm kiếm để tránh lọc liên tục
@@ -70,8 +92,18 @@ const Courses = () => {
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat).push(c);
     });
+    // Sort each category list so enrolled courses appear first
+    for (const [k, list] of map.entries()) {
+      list.sort((a, b) => {
+        const aEn = enrolledIds.includes(a._id);
+        const bEn = enrolledIds.includes(b._id);
+        if (aEn === bEn) return 0;
+        return aEn ? -1 : 1;
+      });
+      map.set(k, list);
+    }
     return map;
-  }, [filtered]);
+  }, [filtered, enrolledIds]);
 
   if (loading)
     return (
@@ -192,7 +224,9 @@ const Courses = () => {
                     }}
                   >
                     {list.map((course) => (
-                      <CourseCard key={course._id} course={course} />
+                      <ErrorBoundary key={course._id}>
+                        <CourseCard course={course} enrolledIds={enrolledIds} />
+                      </ErrorBoundary>
                     ))}
                   </div>
                 </div>
@@ -213,7 +247,9 @@ const Courses = () => {
                     }}
                   >
                     {list.map((course) => (
-                      <CourseCard key={course._id} course={course} />
+                      <ErrorBoundary key={course._id}>
+                        <CourseCard course={course} enrolledIds={enrolledIds} />
+                      </ErrorBoundary>
                     ))}
                   </div>
                 ) : (
@@ -234,8 +270,11 @@ const Courses = () => {
   );
 };
 
-const CourseCard = ({ course }) => (
-  <div
+const CourseCard = ({ course, enrolledIds = [] }) => {
+  try {
+    const isEnrolled = Array.isArray(enrolledIds) && course && course._id ? enrolledIds.includes(course._id) : false;
+    return (
+    <div
     className="course-card"
     style={{
       border: "1px solid #eee",
@@ -260,6 +299,22 @@ const CourseCard = ({ course }) => (
       ></i>
     </div>
     <div className="course-content" style={{ padding: 16 }}>
+      {isEnrolled && (
+        <div style={{ marginBottom: 8 }}>
+          <span
+            style={{
+              backgroundColor: "#10b981",
+              color: "white",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
+            ✅ Đã đăng ký
+          </span>
+        </div>
+      )}
       <span
         className="course-category"
         style={{ fontSize: 12, color: "#6b7280" }}
@@ -336,6 +391,15 @@ const CourseCard = ({ course }) => (
       </div>
     </div>
   </div>
-);
+    );
+  } catch (err) {
+    console.error("CourseCard render error", err, { course, enrolledIds });
+    return (
+      <div className="course-card" style={{ padding: 16, border: '1px solid #eee' }}>
+        <div style={{ color: '#b91c1c' }}>Lỗi hiển thị khóa học</div>
+      </div>
+    );
+  }
+};
 
 export default Courses;

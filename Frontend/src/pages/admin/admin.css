@@ -60,19 +60,23 @@
 }
 
 .btn-primary {
-  background: #4299e1;
-  color: white;
-  padding: 0.75rem 1.5rem;
+  background: linear-gradient(90deg, #2563eb 0%, #7b2ff2 100%);
+  color: #fff;
+  padding: 0.85rem 2.2rem;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  box-shadow: 0 4px 16px 0 #c7d2fe44;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .btn-primary:hover {
-  background: #3182ce;
+  background: linear-gradient(90deg, #7b2ff2 0%, #2563eb 100%);
+  box-shadow: 0 6px 24px 0 #a5b4fc66;
+  transform: translateY(-2px) scale(1.04);
 }
 
 .btn-danger {

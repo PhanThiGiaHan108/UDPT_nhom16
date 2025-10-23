@@ -29,10 +29,11 @@ const paymentSchema = new mongoose.Schema(
     },
     transactionId: {
       type: String,
-      unique: true,
       required: true,
     },
     paymentDetails: {
+      orderCode: String, // ✅ THÊM: Mã đơn hàng từ PayOS
+      paymentLinkId: String, // ✅ THÊM: ID của payment link từ PayOS
       bankCode: String,
       bankAccount: String,
       qrCodeUrl: String,
@@ -68,7 +69,7 @@ const paymentSchema = new mongoose.Schema(
 
 // Indexes để query nhanh
 paymentSchema.index({ userId: 1, status: 1 });
-paymentSchema.index({ transactionId: 1 });
+paymentSchema.index({ transactionId: 1 }, { unique: true });
 
 const Payment = mongoose.model("Payment", paymentSchema);
 

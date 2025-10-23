@@ -1,9 +1,49 @@
+
 import React, { useState, useEffect } from "react";
+import './admin.css';
 import api from "../../services/api";
 import AdminNavbar from "../../components/AdminNavbar";
+import { useNavigate } from "react-router-dom";
 import "./admin.css";
 
 const AdminCourses = () => {
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [showLessonModal, setShowLessonModal] = useState(false);
+  const [lessonTitle, setLessonTitle] = useState("");
+  const [lessonVideo, setLessonVideo] = useState("");
+  const [lessons, setLessons] = useState([]);
+  const navigate = useNavigate();
+  // Khi chọn 1 khóa học để quản lý bài giảng
+  const handleOpenLessons = (course) => {
+    navigate(`/admin/courses/${course._id}/lessons`);
+  };
+
+  const handleAddLesson = () => {
+    if (!lessonTitle || !lessonVideo) return;
+    const newLesson = { title: lessonTitle, video: lessonVideo };
+    setLessons([...lessons, newLesson]);
+    setLessonTitle("");
+    setLessonVideo("");
+  };
+
+  const handleSaveLessons = async () => {
+    if (!selectedCourse) return;
+    try {
+      const token = localStorage.getItem("token");
+      await api.put(`/api/courses/${selectedCourse._id}`, { curriculum: lessons }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccess("Cập nhật bài giảng thành công!");
+      setShowLessonModal(false);
+      fetchCourses();
+    } catch (err) {
+      setError("Không thể cập nhật bài giảng");
+    }
+  };
+
+  const handleRemoveLesson = (idx) => {
+    setLessons(lessons.filter((_, i) => i !== idx));
+  };
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -238,54 +278,89 @@ const AdminCourses = () => {
       <div className="admin-courses-grid">
         {courses && courses.length > 0 ? (
           courses.map((c) => (
-              <div key={c._id} className="admin-course-card">
-                <button
-                  onClick={() => handleDelete(c._id)}
-                  className="btn-danger"
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                  }}
-                >
-                  Xóa
-                </button>
-                {c.image ? (
-                  <img src={c.image} alt={c.title} />
-                ) : (
-                  <div style={{ 
-                    width: "100%", 
-                    height: "200px", 
-                    background: "#f7fafc", 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    fontSize: "3rem",
-                    color: "#cbd5e0"
-                  }}>
-                    <i className={c.icon || "fas fa-book"}></i>
-                  </div>
-                )}
-                <div className="course-info">
-                  <h4>{c.title}</h4>
-                  <p style={{ fontSize: "0.875rem", color: "#666", margin: "0.5rem 0" }}>
-                    {c.description?.substring(0, 100)}...
-                  </p>
-                  <div className="course-meta">
-                    <span>{c.category || "Khác"}</span> · 
-                    <span> {c.students || "0"} học viên</span> · 
-                    <span> {Number(c.price || 0).toLocaleString("vi-VN")}đ</span>
-                  </div>
-                  <div style={{ fontSize: "0.75rem", color: "#a0aec0", marginTop: "0.5rem" }}>
-                    {new Date(c.createdAt).toLocaleString("vi-VN")}
-                  </div>
+            <div key={c._id} className="admin-course-card" onClick={() => handleOpenLessons(c)} style={{ cursor: 'pointer', position: 'relative' }}>
+              <button
+                onClick={e => { e.stopPropagation(); handleDelete(c._id); }}
+                className="btn-danger"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 2
+                }}
+              >
+                Xóa
+              </button>
+              {c.image ? (
+                <img src={c.image} alt={c.title} />
+              ) : (
+                <div style={{ 
+                  width: "100%", 
+                  height: "200px", 
+                  background: "#f7fafc", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  fontSize: "3rem",
+                  color: "#cbd5e0"
+                }}>
+                  <i className={c.icon || "fas fa-book"}></i>
+                </div>
+              )}
+              <div className="course-info">
+                <h4>{c.title}</h4>
+                <p style={{ fontSize: "0.875rem", color: "#666", margin: "0.5rem 0" }}>
+                  {c.description?.substring(0, 100)}...
+                </p>
+                <div className="course-meta">
+                  <span>{c.category || "Khác"}</span> · 
+                  <span> {c.students || "0"} học viên</span> · 
+                  <span> {Number(c.price || 0).toLocaleString("vi-VN")}đ</span>
+                </div>
+                <div style={{ fontSize: "0.75rem", color: "#a0aec0", marginTop: "0.5rem" }}>
+                  {new Date(c.createdAt).toLocaleString("vi-VN")}
+                </div>
+                {/* Danh sách bài giảng */}
+                <div style={{ marginTop: 8 }}>
+                  {Array.isArray(c.curriculum) && c.curriculum.length > 0 ? (
+                    (() => {
+                      // Gom tất cả bài giảng từ mọi section
+                      const allLessons = c.curriculum.reduce((arr, section) => {
+                        if (Array.isArray(section.lessons)) {
+                          return arr.concat(section.lessons);
+                        }
+                        return arr;
+                      }, []);
+                      return (
+                        <>
+                          <span style={{ fontWeight: 600, fontSize: 13 }}>Bài giảng ({allLessons.length}):</span>
+                          <ul style={{ margin: '4px 0 0 0', padding: 0, listStyle: 'none', maxHeight: 80, overflowY: 'auto' }}>
+                            {allLessons.length > 0 ? (
+                              allLessons.map((l, idx) => (
+                                <li key={idx} style={{ fontSize: 13, color: '#374151', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                  <i className="fas fa-play-circle" style={{ marginRight: 4, color: '#2563eb' }}></i>{l.title}
+                                </li>
+                              ))
+                            ) : (
+                              <li style={{ color: '#888', fontSize: 13 }}>Chưa có bài giảng</li>
+                            )}
+                          </ul>
+                        </>
+                      );
+                    })()
+                  ) : (
+                    <span style={{ color: '#888', fontSize: 13 }}>Chưa có bài giảng</span>
+                  )}
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="admin-empty">Chưa có khóa học.</div>
-          )}
+            </div>
+          ))
+        ) : (
+          <div className="admin-empty">Chưa có khóa học.</div>
+        )}
       </div>
+
+      {/* ...modal quản lý bài giảng đã được thay thế bằng trang riêng... */}
       </div>
     </>
   );

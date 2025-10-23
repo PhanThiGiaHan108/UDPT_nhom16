@@ -5,6 +5,7 @@ import Layout from "../components/Layout";
 import Home from "../pages/Home";
 import Courses from "../pages/course/Courses";
 import CourseDetail from "../pages/course/CourseDetail";
+import MyCourseDetail from "../pages/course/MyCourseDetail";
 import MyCourses from "../pages/course/MyCourses";
 import About from "../pages/infor/About";
 import Contact from "../pages/infor/Contact";
@@ -16,7 +17,12 @@ import Register from "../pages/auth/Register";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminCourses from "../pages/admin/AdminCourses";
 import AdminUsers from "../pages/admin/AdminUsers";
+import AdminCourseLessons from "../pages/admin/AdminCourseLessons";
+import PaymentSuccess from "../pages/payment/PaymentSuccess";
+import PaymentCancel from "../pages/payment/PaymentCancel";
 import PaymentResultPage from "../pages/payment/PaymentResultPage";
+
+import PaymentPage from "../pages/payment/PaymentPage";
 
 const AppRouter = () => {
   return (
@@ -27,7 +33,10 @@ const AppRouter = () => {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/course/:id" element={<CourseDetail />} />
+          {/* Support both singular and plural URLs for course detail (some links use /courses/:id) */}
+          <Route path="/courses/:id" element={<CourseDetail />} />
           <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/my-courses/:id" element={<MyCourseDetail />} />
           <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -39,8 +48,13 @@ const AppRouter = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/courses" element={<AdminCourses />} />
+  <Route path="/admin/courses" element={<AdminCourses />} />
+  <Route path="/admin/courses/:id/lessons" element={<AdminCourseLessons />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
+        <Route path="/pay/:id" element={<PaymentPage />} />
         <Route path="/payment/:id" element={<PaymentResultPage />} />
 
         {/* 404 */}

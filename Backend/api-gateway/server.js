@@ -43,7 +43,17 @@ app.use(
 app.use(
   "/api/payment",
   proxy("http://localhost:5004", {
-    proxyReqPathResolver: (req) => req.originalUrl.replace("/api/payment", ""),
+    proxyReqPathResolver: (req) => {
+      return req.originalUrl; // giữ nguyên /api/payment/*
+    },
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      // Prevent duplicate headers
+      return proxyReqOpts;
+    },
+    userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
+      // Pass through response without modification
+      return proxyResData;
+    },
   })
 );
 
